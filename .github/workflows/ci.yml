@@ -1,0 +1,33 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        goos: [darwin, linux, windows]
+        goarch: [amd64, arm64]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go build -v ./...
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: delta-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ matrix.goos == 'windows' && 'delta.exe' || 'delta' }}
+
+      - name: Test
+        run: go test -v ./...
