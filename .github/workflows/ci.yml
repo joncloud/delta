@@ -24,10 +24,16 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: go build -v ./...
 
+      - if: ${{ matrix.goos == 'windows' }}
+        run: zip delta.zip delta.exe
+
+      - if: ${{ matrix.goos != 'windows' }}
+        run: tar -czf delta.tar.gz delta
+
       - uses: actions/upload-artifact@v3
         with:
-          name: delta-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ${{ matrix.goos == 'windows' && 'delta.exe' || 'delta' }}
+          name: delta-${{ matrix.goos }}-${{ matrix.goarch }}.${{ matrix.goos == 'windows' && 'zip' || 'tar.gz' }}
+          path: ${{ matrix.goos == 'windows' && 'delta.zip' || 'delta.tar.gz' }}
 
       - name: Test
         run: go test -v ./...
