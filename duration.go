@@ -16,6 +16,24 @@ const (
 	Nanoseconds  DurationLayout = "n"
 )
 
+func ParseDuration(text string) (DurationLayout, error) {
+	switch text {
+	case "H":
+		return Hours, nil
+	case "M":
+		return Minutes, nil
+	case "s":
+		return Seconds, nil
+	case "m":
+		return Milliseconds, nil
+	case "u":
+		return Microseconds, nil
+	case "n":
+		return Nanoseconds, nil
+	}
+	return Seconds, fmt.Errorf("%s is not a valid duration layout", text)
+}
+
 func FormatDuration(duration time.Duration, layout DurationLayout) string {
 	// TODO have a better layout parser
 	switch layout {

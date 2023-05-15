@@ -22,7 +22,12 @@ func main() {
 	var err error
 	switch command {
 	case "csv":
-		err = CsvMain(stdin, stdout)
+		var options CsvOptions
+		options, err = CsvOptionsParse(args[1:])
+
+		if err == nil {
+			err = CsvHandle(options, stdin, stdout)
+		}
 	case "jsonl":
 		err = JsonlMain(stdin, stdout)
 	case "regex":
@@ -33,7 +38,7 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%d\n", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 }

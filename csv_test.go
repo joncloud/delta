@@ -2,10 +2,10 @@ package main
 
 import "testing"
 
-func TestCsvHandle(t *testing.T) {
+func TestCsvOptionsParse(t *testing.T) {
 	// TODO
 }
 
-func TestCsvMain(t *testing.T) {
+func TestCsvHandle(t *testing.T) {
 	// TODO
 }

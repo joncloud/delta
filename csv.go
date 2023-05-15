@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -13,6 +15,41 @@ type CsvOptions struct {
 	TimeColumn     int
 	TimeLayout     string
 	DurationLayout DurationLayout
+}
+
+func CsvOptionsParse(args []string) (CsvOptions, error) {
+	options := CsvOptions{
+		TimeColumn:     0,
+		TimeLayout:     time.RFC3339,
+		DurationLayout: Seconds,
+	}
+	for i := 0; i < len(args); i += 2 {
+		if i+1 == len(args) {
+			return options, errors.New("expected a positive integer, ex: --time-column 3")
+		}
+		switch args[i] {
+		case "--time-column":
+			column, err := strconv.Atoi(args[i+1])
+			if err != nil {
+				return options, err
+			}
+			if column < 0 {
+				return options, errors.New("expected a positive integer, ex: --time-column 3")
+			}
+			options.TimeColumn = column
+		case "--time-layout":
+			options.TimeLayout = args[i+1]
+		case "--duration-layout":
+			layout, err := ParseDuration(args[i+1])
+			if err != nil {
+				return options, err
+			}
+			options.DurationLayout = layout
+		default:
+			return options, fmt.Errorf("invalid arg %s", args[i])
+		}
+	}
+	return options, nil
 }
 
 func CsvHandle(options CsvOptions, stdin *bufio.Reader, stdout *bufio.Writer) error {
@@ -73,15 +110,4 @@ func CsvHandle(options CsvOptions, stdin *bufio.Reader, stdout *bufio.Writer) er
 	}
 
 	return nil
-}
-
-func CsvMain(stdin *bufio.Reader, stdout *bufio.Writer) error {
-	// TODO parse options from os.Args
-	options := CsvOptions{
-		TimeColumn:     0,
-		TimeLayout:     time.RFC3339,
-		DurationLayout: Seconds,
-	}
-	err := CsvHandle(options, stdin, stdout)
-	return err
 }
