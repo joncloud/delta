@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"os"
 	"testing"
 	"time"
 )
@@ -84,5 +87,38 @@ func TestCsvOptionsParseValidDurationLayout(t *testing.T) {
 }
 
 func TestCsvHandle(t *testing.T) {
-	// TODO
+	input, err := os.Open("test.csv")
+	if err != nil {
+		t.Fatal("Unable to open test.csv")
+	}
+
+	defer input.Close()
+
+	var b bytes.Buffer
+
+	var args []string
+	options, err := CsvOptionsParse(args)
+	if err != nil {
+		t.Fatalf("Unable to read csv options: %v", err)
+	}
+	stdout := bufio.NewWriter(&b)
+	err = CsvHandle(options, bufio.NewReader(input), stdout)
+
+	if err != nil {
+		t.Fatalf("Unable to handle csv: %v", err)
+	}
+
+	stdout.Flush()
+
+	file, err := os.ReadFile("test.expected.csv")
+	if err != nil {
+		t.Fatalf("Unable to read expected csv file: %v", err)
+	}
+
+	actual := b.String()
+	expected := string(file)
+
+	if actual != expected {
+		t.Fatalf("CSV contents differed, expected (%v), actual (%v)", expected, actual)
+	}
 }
